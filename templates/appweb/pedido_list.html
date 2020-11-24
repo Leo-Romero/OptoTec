@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Pedidos</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Pedidos:</h2>
+    <a href="{% url 'appweb:addPed' %}" class="btn btn-primary">Agregar</a></p>
+    {% if pedido_list %}
+    <ul class="list-group">
+        {% for pedido in pedido_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:editPed' pk=pedido.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a> <u>Fecha:</u> {{ pedido.fecha }} <b>Producto:</b> {{ pedido.producto }} &nbsp;&nbsp;&nbsp; {{ pedido.paciente }}<br>
+            {% for prod in pedido.producto.all %}
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8594;<b>Producto:</b> {{ prod }} <br>
+            {% endfor %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

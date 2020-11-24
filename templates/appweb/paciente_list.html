@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Pacientes</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Pacientes:</h2>
+    <a href="{% url 'appweb:addPac' %}" class="btn btn-primary">Agregar</a></p>
+    {% if paciente_list %}
+    <ul class="list-group">
+        {% for paciente in paciente_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:editPac' pk=paciente.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a>&nbsp;{{ paciente.apellido }} {{paciente.nombres}} <b>Dirección:</b> {{paciente.direccion}} <b>Tel.:</b> {{paciente.telefono}}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Perfiles</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Perfiles de usuarios:</h2>
+    <h5>(deben estar cargados previamente en "Registrar")</h5>
+    <a href="{% url 'appweb:addPer' %}" class="btn btn-primary">Agregar</a></p>
+    {% if perfil_list %}
+    <ul  class="list-group">
+        {% for perfil in perfil_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:editPer' pk=perfil.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a> &nbsp;{{ perfil.usuario }} <b>Nacim.:</b> {{perfil.f_nac}} <b>Puesto:</b> {{perfil.puesto}} <b>Tel.:</b> {{perfil.telefono}} <b>Int.:</b> {{perfil.interno}}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

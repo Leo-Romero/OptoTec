@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Historias Clinicas</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Historias Clínicas:</h2>
+    <a href="{% url 'appweb:addHis' %}" class="btn btn-primary">Agregar</a></p>
+    {% if historia_list %}
+    <ul class="list-group">
+        {% for historia in historia_list %}
+        <li class="list-group-item">
+            {{ historia.fecha }}</p>
+            <b>Motivo:</b> {{ historia.motivo }}</p>
+            <b>Enf. Actual:</b> {{ historia.enf_actual }}</p>
+            <b>Tratamiento:</b> {{ historia.tratamiento }}</p>
+            <b>Antecedentes:</b> {{ historia.antecedentes }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

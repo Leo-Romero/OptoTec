@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+    {% block title %}<title>Optometria</title>{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+
+    <!-- Add additional CSS in static file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-2">
+            {% block sidebar %}
+                <section class="contenedor">
+                    <header>
+                        <nav>
+                            <p><u>Usuario:</u> {{ user.get_username }}</p><br>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'appweb:index' %}">Inicio</a><br>
+                                {% if perms.appweb.secretaria %}	
+                                <a href="{% url 'appweb:signup' %}">Usuarios</a><br>	
+                                <a href="{% url 'appweb:listPer' %}">Perfiles</a><br>
+                                <a href="{% url 'appweb:listProd' %}">Productos</a><br>
+                                <a href="{% url 'appweb:listPac' %}">Pacientes</a><br>
+                                <a href="{% url 'appweb:listTur' %}">Turnos</a><br>
+                                {% endif %}
+                                {% if perms.appweb.medico %}
+                                <a href="{% url 'appweb:listPacMed' %}">Pacientes M</a><br>
+                                <a href="{% url 'appweb:listPacxFecha' %}">Pac x Fecha</a><br>
+                                {% endif %}
+                                {% if perms.appweb.ventas %}
+                                <a href="{% url 'appweb:listPed' %}">Pedidos</a><br>
+                                {% endif %}
+                                {% if perms.appweb.tecnico %}
+                                <a href="{% url 'appweb:listPedT' %}">Taller</a><br>
+                                {% endif %}
+                                {% if perms.appweb.gerencia%}
+                                REPORTES<br>
+                                <a href="{% url 'appweb:listPacGer' %}">- Concurrieron</a><br>
+                                <a href="{% url 'appweb:listPedGer' %}">- Pedidos</a><br>
+                                <a href="{% url 'appweb:listProdGer' %}">- Prod vendidos</a><br>
+                                <a href="{% url 'appweb:listVentGer' %}">- Ventas</a><br>
+                                -----------<br>
+                                {% endif %}
+				                <a href="{% url 'logout'%}?next={{request.path}}">Logout</a><br>
+                		    {% else %}  
+				                <a href="{% url 'login'%}?next={{request.path}}">Login</a><br>
+                            {% endif %}
+                            
+                	    </nav>
+                    </header>
+                </section>
+            {% endblock %}
+            </div>
+            <div class="col-sm-10 ">
+            {% block content %}{% endblock %}
+
+            {% block pagination %}
+                {% if is_paginated %}
+                    <div class="pagination">
+                    <span class="page-links">
+                    {% if page_obj.has_previous %}
+                        <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">anterior</a>
+                    {% endif %}
+                    <span class="page-current">
+                        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">próximo</a>
+                    {% endif %}
+                    </span>
+                    </div>
+                {% endif %}
+            {% endblock %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

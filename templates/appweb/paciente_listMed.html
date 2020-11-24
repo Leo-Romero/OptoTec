@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Pacientes</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Pacientes:</h2>
+    {% if paciente_list %}
+    <ul class="list-group">
+        {% for paciente in paciente_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:listHis' pk=paciente.id %}" class="btn btn-secondary">&nbsp;Histo.&nbsp;</a>&nbsp;{{ paciente.apellido }} {{paciente.nombres}} <b>Dirección:</b> {{paciente.direccion}} <b>Tel.:</b> {{paciente.telefono}}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

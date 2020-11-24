@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Turnos</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Turnos:</h2>
+    <a href="{% url 'appweb:addTur' %}" class="btn btn-primary">Agregar</a></p>
+    {% if turno_list %}
+    <ul class="list-group">
+        {% for turno in turno_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:editTur' pk=turno.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a> <a href="{% url 'appweb:delTur' pk=turno.id %}" class="btn btn-danger" >Eliminar</a> &nbsp;{{turno.fecha}} {{turno.hora}} <b>Paciente:</b> {{ turno.paciente }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

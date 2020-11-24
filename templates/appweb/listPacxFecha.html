@@ -1,0 +1,50 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Pacientes por Fecha</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Pacientes por fecha:</h2>
+
+    {% if messages %}
+  <ul class="messages">
+<!--  {% for message in messages %} -->
+      <p style="color: red" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+<!--  <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li> -->
+<!--  {% endfor %} -->
+  </ul>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+  </form>
+
+
+    {% if turno_list %}
+    <br>
+    <ul class="list-group">
+        {% for turno in turno_list %}
+        <li class="list-group-item">
+            {{turno.fecha}} {{turno.hora}} <b>Paciente:</b> {{ turno.paciente }}
+        </li>
+        {% endfor %}
+    </ul>
+    <br>
+    {% else %}
+        <br>
+        <p>No hay datos para listar</p>
+    {% endif %}
+    <br>
+{% endblock %}

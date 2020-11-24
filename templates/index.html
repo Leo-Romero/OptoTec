@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% load static %}
+    <h1>Optometria</h1>
+    <p>(C) 2020 Leonardo Romero</p>
+    <p>TRABAJO FINAL CURSO 2020</p>
+    <p>Para: - PoloTic Misiones -</p>
+    <img src="{% static 'img/logo.jpeg' %}" width="320" height="300" alt="logo"><br>
+    <p>Usted ingresó: {{ num_visits }}
+        {% if num_visits == 1 %}
+            vez
+        {% else %}
+            veces
+        {% endif %}.</p>
+{% endblock %}

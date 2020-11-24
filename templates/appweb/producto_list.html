@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Productos</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Productos:</h2>
+    <a href="{% url 'appweb:addProd' %}" class="btn btn-primary">Agregar</a></p>
+    {% if producto_list %}
+    <ul class="list-group">
+        {% for producto in producto_list %}
+        <li class="list-group-item">
+            <a href="{% url 'appweb:editProd' pk=producto.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a> {{ producto.nombre }} <u>Marca:</u> {{ producto.marca }} <br>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}

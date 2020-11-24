@@ -1,0 +1,21 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Renglones</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Renglones:</h2>
+    <a href="{% url 'appweb:addRenPed' %}" class="btn btn-primary">Agregar</a></p>
+    {% if renglon_list %}
+    <ul class="list-group">
+        {% for renglon in renglon_list %}
+        <li class="list-group-item">
+            <b>Producto:</b> {{ renglon.producto }} &nbsp;&nbsp;&nbsp; {{ renglon.cantidad}}<br>
+        </li>
+        {% endfor %}
+    </ul>
+    <br>
+    <a href="{% url 'appweb:index' %}" class="btn btn-primary">Salir</a>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}
