@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Eliminar pedido</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <form method="post">
+        {% csrf_token %}
+        <h5>Desea eliminar el pedido ?</h5>
+        <a href="{%  url 'appweb:listPed' %}" class="btn btn-primary">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    </form>
+{% endblock %}

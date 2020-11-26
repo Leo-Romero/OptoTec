@@ -62,11 +62,7 @@ class PerfilFormEdit(forms.ModelForm):
 class PacienteForm(forms.ModelForm):
     """
     Formulario para Pacientes, campo 'medico' se rellena con solo puesto=medico
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['medico'].queryset = Perfil.objects.filter(puesto='MEDICO')
-    
+    """    
     class Meta:
         model = Paciente
         fields = (
@@ -86,6 +82,9 @@ class PacienteForm(forms.ModelForm):
             'medico',
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['medico'].queryset = Perfil.objects.filter(puesto='MEDICO')
 
 
 class HistoriaForm(forms.ModelForm):
@@ -107,11 +106,7 @@ class HistoriaForm(forms.ModelForm):
 class TurnoForm(forms.ModelForm):
     """
     Formulario para turnos, campo 'medico' se rellena con solo puesto=medico
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['medico'].queryset = Perfil.objects.filter(puesto='MEDICO')
-    
+    """    
     class Meta:
         model = Turno
         fields = (
@@ -124,7 +119,11 @@ class TurnoForm(forms.ModelForm):
         widgets = {
             'fecha': forms.NumberInput(attrs={'type': 'date'}),
             'hora': forms.TimeInput(attrs={'type': 'time'}),
-        } 
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['medico'].queryset = Perfil.objects.filter(puesto='MEDICO')
 
 
 class FiltroFechas(forms.Form):
@@ -145,8 +144,23 @@ class PedidoForm(forms.ModelForm):
     """
     class Meta:
         model = Pedido
-        fields = '__all__'
+        fields = (
+            'fecha',
+            'paciente',
+            'estado',
+            'total',
+            'tipo_pago',
+            'nota',
+            'vendedor',
+        )
+        help_texts = {
+            'total': ('SOLO LECTURA'),
+        }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['vendedor'].queryset = Perfil.objects.filter(puesto='VENTAS')
+        self.fields['total'].widget.attrs['readonly'] = True
 
 class PedidoRengForm(forms.ModelForm):
     """
@@ -154,7 +168,20 @@ class PedidoRengForm(forms.ModelForm):
     """
     class Meta:
         model = RenglonPedido
-        fields = '__all__'
+        fields = (
+            'pedido',
+            'producto',
+            'cantidad',
+            'subtotal',
+        )
+        help_texts = {
+            'subtotal': ('SOLO LECTURA'),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['subtotal'].widget.attrs['readonly'] = True
+
 
 class PedidoTForm(forms.ModelForm):
     """

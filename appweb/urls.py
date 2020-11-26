@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import home, signup, addPerfil, listPerfil, editPerfil, addPaciente, listPaciente, editPaciente, listPacienteMed, addHistoria, listHistoria, addTurno, editTurno, listTurno, delTurno, listPacxFecha, addPedido, listPedido, editPedido, listPedidoT, editPedidoT, addProducto, listProducto, editProducto, listPacienteGer, listPedidoGer, listProdGer, listVentGer
-from .views import listRenPedido, addRenPedido
+from .views import listRenPedido, addRenPedido, listRenPedidoEd, editRenPedido, delPedido
 
 
 app_name = 'appweb'
@@ -23,9 +23,12 @@ urlpatterns = [
     path('addPed/', addPedido, name='addPed'),
     path('listPed/', listPedido, name='listPed'),
     path('editPed/<int:pk>/', editPedido, name='editPed'),
+    path('delPed/<int:pk>/', delPedido, name='delPed'),
+
     path('addRenPed/', addRenPedido, name='addRenPed'),
     path('listRenPed/', listRenPedido, name='listRenPed'),
-  #  path('editRenPed/<int:pk>/', editRenPedido, name='editRenPed'),
+    path('listRenPedEd/<int:pk>/', listRenPedidoEd, name='listRenPedEd'),
+    path('editRenPed/<int:pk>/', editRenPedido, name='editRenPed'),
 
     path('listPedT/', listPedidoT, name='listPedT'),
     path('editPedT/<int:pk>/', editPedidoT, name='editPedT'),

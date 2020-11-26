@@ -1,4 +1,5 @@
 import datetime
+from django.db.models import Avg, Sum, Count
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -619,14 +620,10 @@ def addPedido(request):
     """
     Funcion para agregar ventas
     """
-    #username = None
-    #username = request.user.username
-
     if request.method == 'POST':
         form = PedidoForm(request.POST)
         if form.is_valid():
             data = form.save(commit=False)
-            # data.vendedor = username
             data.save()
             return redirect('appweb:listRenPed')
     else:
@@ -640,14 +637,10 @@ def addRenPedido(request):
     """
     Funcion para agregar renglones de pedidos
     """
-    #username = None
-    #username = request.user.username
-
     if request.method == 'POST':
         form = PedidoRengForm(request.POST)
         if form.is_valid():
             data = form.save(commit=False)
-            # data.vendedor = username
             data.save()
             return redirect('appweb:listRenPed')
     else:
@@ -669,10 +662,20 @@ def listPedido(request):
 @permission_required('appweb.ventas')
 def listRenPedido(request):
     """
-    Todos
+    Todos los renglones
     """
     renglones = RenglonPedido.objects.all()
     return render(request, 'appweb/pedido_listR.html', {'renglon_list': renglones})
+
+
+@login_required
+@permission_required('appweb.ventas')
+def listRenPedidoEd(request, pk):
+    """
+    Todos los renglones filtrado por pk
+    """
+    renglones = RenglonPedido.objects.filter(pedido_id=pk)
+    return render(request, 'appweb/pedido_listREd.html', {'renglon_list': renglones})
 
 
 @login_required
@@ -689,7 +692,37 @@ def editPedido(request, pk):
         if form.is_valid():
             form.save()
         redirect('/')
+    return render(request, 'appweb/editPed.html', {'form': form, 'pk': pk})
+
+
+@login_required
+@permission_required('appweb.ventas')
+def editRenPedido(request, pk):
+    """
+    Editar renglones de pedidos
+    """
+    data = Pedido.objects.get(id = pk)
+    if request.method == 'GET':
+        form = PedidoForm(instance=data)
+    else:
+        form = PedidoForm(request.POST, instance=data)
+        if form.is_valid():
+            form.save()
+        redirect('/')
     return render(request, 'appweb/editPed.html', {'form': form})
+
+
+@login_required
+@permission_required('appweb.ventas')
+def delPedido(request, pk):
+    """
+    Funcion para eliminar turnos
+    """
+    data = Pedido.objects.get(id = pk)
+    if request.method == 'POST':
+        data.delete()
+        return redirect('appweb:listPed')
+    return render(request, 'appweb/delPed.html', {'data':data})
 
 
 ##################################################################
@@ -773,7 +806,7 @@ def editProducto(request, pk):
         if form.is_valid():
             form.save()
         redirect('/')
-    return render(request, 'appweb/editPed.html', {'form': form})
+    return render(request, 'appweb/editProd.html', {'form': form})
 
 
 ##################################################################
@@ -828,13 +861,76 @@ def listProdGer(request):
     Productos más vendidos en el mes (desde / hasta)
     """
     filtro = None
+    lista = []
     if request.method == 'POST':
         form = FiltroFechas(request.POST)
         
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-            filtro=Pedido.objects.filter(fecha__range=(desde, hasta), estado=('FINALIZADO')).order_by('-cantidad')
+
+            lista = RenglonPedido.objects.order_by('producto').annotate(total_prod=Sum('producto'))
+            print('----> lista: ', lista[0].producto,' ',lista[0].cantidad,' TOT: ',lista[0].total_prod) 
+            print('----> lista: ', lista[1].producto,' ',lista[1].cantidad,' TOT: ',lista[1].total_prod) 
+            print('----> lista: ', lista[2].producto,' ',lista[2].cantidad,' TOT: ',lista[2].total_prod) 
+
+            cant = RenglonPedido.objects.order_by('producto').aggregate(cant_prod=Count('producto'))
+            print('----> cant: ', cant)     # cant:  {'cant_prod': 3}
+            
+            """
+            #b.renglonpedido_set.count() # obtengo la cantidad de los relacionados
+            b = None
+
+            cant = Pedido.objects.annotate(num_fec=Count('fecha'))
+            print('----> cant: ', cant[0].num_fec)  # cant:  1
+
+            cant = Pedido.objects.aggregate(num_fec=Count('fecha'))
+            print('----> cant: ', cant)     # cant:  {'num_fec': 3}
+
+            pedidoFil = Pedido.objects.filter(fecha__range=(desde, hasta), estado=('FINALIZADO'))
+
+            for pedido in pedidoFil:
+
+                cant = pedido.renglonpedido_set.aggregate(num_fec=Count('producto'))
+                print('----> cant prod: ', cant)     # cant prod:  {'num_fec': 2}
+
+               # agregado = pedido.renglonpedido_set.all().aggregate(cant_nomb=count('nombre'))
+
+               # print('----> agregado: ', agregado)
+
+                print('----> Pedido: ', pedido)
+                print('----> Pedido.id: ', pedido.id)
+            
+                b = Pedido.objects.get(id=pedido.id)
+                print('----> GET: ', b)
+                c = b.renglonpedido_set.all()
+                print('----> SET: ', c)
+
+                gafas = Producto.objects.get(nombre='Gafas de prueba')
+                cantidad_de_gafas = c.filter(producto=gafas).count()
+                print('----> Gafas: ', cantidad_de_gafas)
+
+                lentes = Producto.objects.get(nombre='Lente')
+                cantidad_de_lentes = c.filter(producto=lentes).count()
+                print('----> lentes: ', cantidad_de_lentes)
+
+                linternas = Producto.objects.get(nombre='Linterna puntual')
+                cantidad_de_linternas = c.filter(producto=gafas).count()
+                print('----> linternas: ', cantidad_de_linternas)
+
+                d = b.renglonpedido_set.count()
+                print('----> COUNT: ', d)
+
+
+                
+            
+           
+            for ped in ped_fil:
+                x = RenglonPedido.objects.get(pedido=ped.id)
+                #lista.append(ped.cantidad)
+            print('---->', x)
+            print('---->', x.cantidad)
+            """
     else:
         form = FiltroFechas()
     return render(request, 'appweb/listProdGer.html', {'form': form,'pedido_list': filtro})

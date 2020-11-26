@@ -214,10 +214,9 @@ class Pedido(models.Model):
         (V, 'BILL. VIRTUAL'),
         (E, 'EFECTIVO'),
     ]
-    subtotal = models.DecimalField('Venta Total $', max_digits=7, decimal_places=2)
+    total = models.DecimalField('Venta Total $', max_digits=8, decimal_places=2, default=0.0)
     tipo_pago = models.CharField('Tipo de pago', max_length=13, choices=CONDICION_CHOICES, default=E)
     nota = models.TextField('Notas', blank=True, null=True)
-    #vendedor = models.CharField('vendedor', max_length=150)
     vendedor = models.ForeignKey(Perfil, on_delete=models.SET_NULL, blank=True, null=True)
 
     class Meta:
@@ -245,60 +244,33 @@ class RenglonPedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, blank=True, null=True)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, blank=True)
     cantidad = models.PositiveSmallIntegerField('Cantidad', default=1)
-    total = models.DecimalField('Total', max_digits=7, decimal_places=2)
+    subtotal = models.DecimalField('Subtotal', max_digits=7, decimal_places=2, default=0.0)
 
     def save(self, *args, **kwargs):
-        self.total = self.producto.precio * self.cantidad
-        """
         producto = Producto.objects.get(id=self.producto.id)
         pedido = Pedido.objects.get(id=self.pedido.id)
-        # En caso de actualziar el detalle
-        detalle = RenglonPedido.objects.filter(id=self.id)
-        if detalle:
-            # Más productos
-            if self.cantidad > detalle[0].cantidad:
-                # Total
-                pedido.subtotal += self.total - detalle[0].total
-                # Stock
-                producto.stock  -= detalle[0].cantidad - self.cantidad
-            # Menos productos
-            else:
-                # Total
-                pedido.subtotal -= detalle[0].total - self.total
-                # Stock
-                producto.stock  += self.cantidad - detalle[0].cantidad
-        else:
-           # Actualizo el precio
-            if pedido.subtotal:
-                pedido.subtotal += self.total
-            else:
-                pedido.subtotal = self.total
-            # Actualizo el stock
-            producto.stock -= self.cantidad
+        self.subtotal = self.producto.precio * self.cantidad
+        producto.stock = producto.stock - self.cantidad
+        pedido.total = pedido.total + self.subtotal
         producto.save()
         pedido.save()
-        """
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        # Actualizo el precio
-        pedido = Pedido.objects.get(id=self.pedido.id)
-        pedido.subtotal -= self.total
-        pedido.save()
-        """
-        # Actualizaco el stock
         producto = Producto.objects.get(id=self.producto.id)
-        producto.stock += self.cantidad
+        pedido = Pedido.objects.get(id=self.pedido.id)
+        producto.stock = producto.stock + self.cantidad
+        pedido.total = pedido.total - self.subtotal
         producto.save()
-        """
+        pedido.save()
         super().delete(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Renglón del pedido'
-        verbose_name_plural = 'Renglones de los pedidos'
+        verbose_name = 'Renglon_pedido'
+        verbose_name_plural = 'Renglones_pedidos'
 
     def obtenerCantidad(self):
-        return f"{self.cantidad} {'unidades' if self.cantidad > 1 else 'unidad'}"
+        return f"{self.cantidad}"
 
     def __str__(self):
         return self.producto.nombre
