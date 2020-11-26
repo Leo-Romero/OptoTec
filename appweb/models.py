@@ -224,9 +224,6 @@ class Pedido(models.Model):
         verbose_name_plural = 'Pedidos'
         ordering = ['-fecha']
 
-    #def get_subtotal(self):
-    #    return self.cantidad * self.precio
-
     def verSubTotal(self):
         return f"{self.subtotal}"
     

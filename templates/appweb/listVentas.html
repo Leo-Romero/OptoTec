@@ -32,18 +32,15 @@
     <button type="submit" class="btn btn-secondary">Filtrar</button>
   </form>
 
-
-    {% if pedido_list %}
+    {% if ventas.items %}
     <br>
     <ul class="list-group">
-        
-          {% for pedido in pedido_list %}
+          {% for key, value in ventas.items %}
           <li class="list-group-item">
-            <b>Vendedor: </b>{{ pedido.vendedor }}<br>
-            <b>Producto: </b>{{ pedido.producto }} &nbsp;&#8594;<b>Cantidad: </b> {{ pedido.cantidad }} $ {{ pedido.precio}} <b>Total: </b>${{ pedido.get_subtotal }}
+            TOTAL: {{value}} <b>Vendedro: </b>{{key}}
           </li>
           {% endfor %}
-          <b>TOTAL= ${{ total }}</b> 
+          <b>TOTAL= ${{ ttotal }}</b> 
     </ul>
     <br>
     {% else %}

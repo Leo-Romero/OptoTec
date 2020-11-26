@@ -1,5 +1,6 @@
-import datetime
-from django.db.models import Avg, Sum, Count
+#import datetime     # se usa?
+#from django.db.models import Avg, Sum, Count    # sacar
+import operator # para el orden del diccionario
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
@@ -859,9 +860,13 @@ def listPedidoGer(request):
 def listProdGer(request):
     """
     Productos más vendidos en el mes (desde / hasta)
+
+    OJO Checar que pasa si el diccionario esta vacio
     """
     filtro = None
     lista = []
+    ventas = {}
+    valores_ord = {}
     if request.method == 'POST':
         form = FiltroFechas(request.POST)
         
@@ -869,71 +874,23 @@ def listProdGer(request):
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
 
-            lista = RenglonPedido.objects.order_by('producto').annotate(total_prod=Sum('producto'))
-            print('----> lista: ', lista[0].producto,' ',lista[0].cantidad,' TOT: ',lista[0].total_prod) 
-            print('----> lista: ', lista[1].producto,' ',lista[1].cantidad,' TOT: ',lista[1].total_prod) 
-            print('----> lista: ', lista[2].producto,' ',lista[2].cantidad,' TOT: ',lista[2].total_prod) 
-
-            cant = RenglonPedido.objects.order_by('producto').aggregate(cant_prod=Count('producto'))
-            print('----> cant: ', cant)     # cant:  {'cant_prod': 3}
+            lista = RenglonPedido.objects.order_by('producto').filter(pedido__fecha__range=(desde, hasta), pedido__estado='FINALIZADO')
             
-            """
-            #b.renglonpedido_set.count() # obtengo la cantidad de los relacionados
-            b = None
-
-            cant = Pedido.objects.annotate(num_fec=Count('fecha'))
-            print('----> cant: ', cant[0].num_fec)  # cant:  1
-
-            cant = Pedido.objects.aggregate(num_fec=Count('fecha'))
-            print('----> cant: ', cant)     # cant:  {'num_fec': 3}
-
-            pedidoFil = Pedido.objects.filter(fecha__range=(desde, hasta), estado=('FINALIZADO'))
-
-            for pedido in pedidoFil:
-
-                cant = pedido.renglonpedido_set.aggregate(num_fec=Count('producto'))
-                print('----> cant prod: ', cant)     # cant prod:  {'num_fec': 2}
-
-               # agregado = pedido.renglonpedido_set.all().aggregate(cant_nomb=count('nombre'))
-
-               # print('----> agregado: ', agregado)
-
-                print('----> Pedido: ', pedido)
-                print('----> Pedido.id: ', pedido.id)
+            tmp = lista[0].producto
+            subt = 0
+            for x in range(len(lista)): 
+                ventas[lista[x].producto] = lista[x].cantidad
+                if tmp == lista[x].producto:
+                    subt = subt + lista[x].cantidad
+                else:
+                    ventas[tmp] = subt
+                    subt = lista[x].cantidad
+                    tmp = lista[x].producto
             
-                b = Pedido.objects.get(id=pedido.id)
-                print('----> GET: ', b)
-                c = b.renglonpedido_set.all()
-                print('----> SET: ', c)
-
-                gafas = Producto.objects.get(nombre='Gafas de prueba')
-                cantidad_de_gafas = c.filter(producto=gafas).count()
-                print('----> Gafas: ', cantidad_de_gafas)
-
-                lentes = Producto.objects.get(nombre='Lente')
-                cantidad_de_lentes = c.filter(producto=lentes).count()
-                print('----> lentes: ', cantidad_de_lentes)
-
-                linternas = Producto.objects.get(nombre='Linterna puntual')
-                cantidad_de_linternas = c.filter(producto=gafas).count()
-                print('----> linternas: ', cantidad_de_linternas)
-
-                d = b.renglonpedido_set.count()
-                print('----> COUNT: ', d)
-
-
-                
-            
-           
-            for ped in ped_fil:
-                x = RenglonPedido.objects.get(pedido=ped.id)
-                #lista.append(ped.cantidad)
-            print('---->', x)
-            print('---->', x.cantidad)
-            """
+            valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))
     else:
         form = FiltroFechas()
-    return render(request, 'appweb/listProdGer.html', {'form': form,'pedido_list': filtro})
+    return render(request, 'appweb/listProdGer.html', {'form': form,'pedido_list': filtro, 'ventas': valores_ord})
 
 
 @login_required
@@ -945,19 +902,33 @@ def listVentGer(request):
     calculo subtotal y luego hago un bucle for del filtro para totalizar
     """
     filtro = None
-    subt = 0
-    total = 0
+    lista = []
+    ventas = {}
+    valores_ord = {}
+    ttotal = 0
     if request.method == 'POST':
         form = FiltroFechas(request.POST)
         
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-            filtro=Pedido.objects.filter(fecha__range=(desde, hasta), estado=('FINALIZADO')).order_by('vendedor')
-            for subtotal in filtro:
-                subt = subtotal.cantidad * subtotal.precio
-                total = total + subt 
-                subt = 0
+
+            lista = Pedido.objects.order_by('vendedor').filter(fecha__range=(desde, hasta), estado=('FINALIZADO'))
+            
+            tmp = lista[0].vendedor
+            subt = 0
+            for x in range(len(lista)): 
+                ventas[lista[x].vendedor] = lista[x].total
+                if tmp == lista[x].vendedor:
+                    subt = subt + lista[x].total
+                else:
+                    ventas[tmp] = subt
+                    #ttotal += subt
+                    subt = lista[x].total
+                    tmp = lista[x].vendedor
+            
+            valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))
+      
     else:
         form = FiltroFechas()
-    return render(request, 'appweb/listVentas.html', {'form': form,'pedido_list': filtro,'total': total})
+    return render(request, 'appweb/listVentas.html', {'form': form,'pedido_list': filtro,'ventas': valores_ord, 'ttotal': ttotal})
