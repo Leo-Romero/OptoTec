@@ -660,7 +660,17 @@ def listPedido(request):
     """
     Todos los pedidos menos los FINALIZADO
     """
-    pedidos = Pedido.objects.exclude(estado__exact='FINALIZADO')
+    pedidos = Pedido.objects.exclude(estado='FINALIZADO')
+    """
+    tmp = pedidos[0].paciente
+    for x in range(len(pedidos)):
+        b = RenglonPedido.objects.get(pk=pedidos[x].id)
+        renglones[pedidos[x].paciente] = b
+        print('-->', renglones)
+    
+    #renglones = RenglonPedido.objects.filter(pedido=pedidos)
+    #return render(request, 'appweb/pedido_list.html', {'pedido_list': pedidos, 'renglon': renglones})
+    """
     return render(request, 'appweb/pedido_list.html', {'pedido_list': pedidos})
 
 
@@ -670,19 +680,29 @@ def listRenPedido(request):
     """
     Todos los renglones
     """
-    renglones = RenglonPedido.objects.all()
+    #renglones = RenglonPedido.objects.all()
+    renglones = {}
     return render(request, 'appweb/pedido_listR.html', {'renglon_list': renglones})
 
 
 @login_required
 @permission_required('appweb.ventas')
+def vistalistRenPedido(request, pk):
+    """
+    Vista de renlones por pedido
+    """
+    renglones = RenglonPedido.objects.filter(pedido=pk)
+
+    return render(request, 'appweb/vistaPedRen.html', {'renglon_list': renglones})
+
+"""
+@login_required
+@permission_required('appweb.ventas')
 def listRenPedidoEd(request, pk):
-    """
-    Todos los renglones filtrado por pk
-    """
+   
     renglones = RenglonPedido.objects.filter(pedido_id=pk)
     return render(request, 'appweb/pedido_listREd.html', {'renglon_list': renglones})
-
+"""
 
 @login_required
 @permission_required('appweb.ventas')
@@ -700,13 +720,11 @@ def editPedido(request, pk):
         redirect('/')
     return render(request, 'appweb/editPed.html', {'form': form, 'pk': pk})
 
-
+"""
 @login_required
 @permission_required('appweb.ventas')
 def editRenPedido(request, pk):
-    """
-    Editar renglones de pedidos
-    """
+
     data = Pedido.objects.get(id = pk)
     if request.method == 'GET':
         form = PedidoForm(instance=data)
@@ -716,7 +734,7 @@ def editRenPedido(request, pk):
             form.save()
         redirect('/')
     return render(request, 'appweb/editPed.html', {'form': form})
-
+"""
 
 @login_required
 @permission_required('appweb.ventas')
@@ -952,3 +970,5 @@ def listVentGer(request):
     else:
         form = FiltroFechas()
     return render(request, 'appweb/listVentas.html', {'form': form, 'ventas': valores_ord, 'ttotal': ttotal})
+
+

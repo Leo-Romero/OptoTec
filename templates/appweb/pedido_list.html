@@ -9,10 +9,7 @@
     <ul class="list-group">
         {% for pedido in pedido_list %}
         <li class="list-group-item">
-            <a href="{% url 'appweb:editPed' pk=pedido.id %}" class="btn btn-primary">&nbsp;Editar&nbsp;</a> <a href="{% url 'appweb:delPed' pk=pedido.id %}" class="btn btn-danger">Eliminar</a> <u>Fecha:</u> {{ pedido.fecha }} <b>Producto:</b> {{ pedido.producto }} &nbsp;&nbsp;&nbsp; {{ pedido.paciente }}<br>
-            {% for prod in pedido.producto.all %}
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#8594;<b>Producto:</b> {{ prod }} <br>
-            {% endfor %}
+            <a href="{% url 'appweb:editPed' pk=pedido.id%}" class="btn btn-primary">Editar</a> <a href="{% url 'appweb:verPed' pk=pedido.id%}" class="btn btn-primary">Ver</a>&nbsp;&nbsp;<u>Fecha:</u> {{ pedido.fecha }} &nbsp;&nbsp;&nbsp; <b>Paciente: </b>{{ pedido.paciente }} <b>Estado: </b>{{ pedido.estado }} <b>Total: </b>${{ pedido.total }}<br>
         </li>
         {% endfor %}
     </ul>
