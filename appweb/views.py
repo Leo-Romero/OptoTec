@@ -1,5 +1,5 @@
 #import datetime     # se usa?
-#from django.db.models import Avg, Sum, Count    # sacar
+from django.db.models import Avg, Sum, Count    # sacar
 import operator # para el orden del diccionario
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -603,7 +603,12 @@ def listPacxFecha(request):
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-            filtro=Turno.objects.filter(fecha__range=(desde, hasta), medico=(nom))
+            # Chequeo que desde no sea mayor a hasta
+            if desde > hasta:
+                messages.error(request, 'desde debe ser menor a hasta', extra_tags='desde')
+                print(form.errors)
+            else:
+                filtro=Turno.objects.filter(fecha__range=(desde, hasta), medico=(nom))
     else:
         form = FiltroFechas()
     return render(request, 'appweb/listPacxFecha.html', {'form': form,'turno_list': filtro})
@@ -829,8 +834,13 @@ def listPacienteGer(request):
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-            fueron = request.POST.get("concurrieron")
-            filtro=Turno.objects.filter(fecha__range=(desde, hasta), concurrio=(fueron))
+            # Chequeo que desde no sea mayor a hasta
+            if desde > hasta:
+                messages.error(request, 'desde debe ser menor a hasta', extra_tags='desde')
+                print(form.errors)
+            else:
+                fueron = request.POST.get("concurrieron")
+                filtro=Turno.objects.filter(fecha__range=(desde, hasta), concurrio=(fueron))
     else:
         form = FiltroFechasCheck()
     return render(request, 'appweb/listPacxFecha.html', {'form': form,'turno_list': filtro})
@@ -849,7 +859,12 @@ def listPedidoGer(request):
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-            filtro=Pedido.objects.filter(fecha__range=(desde, hasta))
+            # Chequeo que desde no sea mayor a hasta
+            if desde > hasta:
+                messages.error(request, 'desde debe ser menor a hasta', extra_tags='desde')
+                print(form.errors)
+            else:
+                filtro=Pedido.objects.filter(fecha__range=(desde, hasta))
     else:
         form = FiltroFechas()
     return render(request, 'appweb/listPedGer.html', {'form': form,'pedido_list': filtro})
@@ -860,10 +875,8 @@ def listPedidoGer(request):
 def listProdGer(request):
     """
     Productos más vendidos en el mes (desde / hasta)
-
-    OJO Checar que pasa si el diccionario esta vacio
+    EL renglon de pedido ordenado por producto y el Pedido FINALIZADO, entre fechas
     """
-    filtro = None
     lista = []
     ventas = {}
     valores_ord = {}
@@ -873,24 +886,28 @@ def listProdGer(request):
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
-
-            lista = RenglonPedido.objects.order_by('producto').filter(pedido__fecha__range=(desde, hasta), pedido__estado='FINALIZADO')
-            
-            tmp = lista[0].producto
-            subt = 0
-            for x in range(len(lista)): 
-                ventas[lista[x].producto] = lista[x].cantidad
-                if tmp == lista[x].producto:
-                    subt = subt + lista[x].cantidad
-                else:
-                    ventas[tmp] = subt
-                    subt = lista[x].cantidad
-                    tmp = lista[x].producto
-            
-            valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))
+            # Chequeo que desde no sea mayor a hasta
+            if desde > hasta:
+                messages.error(request, 'desde debe ser menor a hasta', extra_tags='desde')
+                print(form.errors)
+            else:
+                lista = RenglonPedido.objects.order_by('producto').filter(pedido__fecha__range=(desde, hasta), pedido__estado='FINALIZADO')
+                if lista:       # si lista no esta vacia
+                    tmp = lista[0].producto
+                    subt = 0
+                    for x in range(len(lista)): 
+                        if tmp == lista[x].producto:
+                            subt += lista[x].cantidad
+                            ventas[tmp] = subt
+                        else:
+                            subt = lista[x].cantidad
+                            tmp = lista[x].producto
+                            ventas[tmp] = subt
+                    # ordeno el diccionario
+                    valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))   
     else:
         form = FiltroFechas()
-    return render(request, 'appweb/listProdGer.html', {'form': form,'pedido_list': filtro, 'ventas': valores_ord})
+    return render(request, 'appweb/listProdGer.html', {'form': form, 'ventas': valores_ord})
 
 
 @login_required
@@ -898,10 +915,8 @@ def listProdGer(request):
 def listVentGer(request):
     """
     Ventas totales por mes clasificadas por Vendedores
-    Listado de ventas filtrado por fechas
-    calculo subtotal y luego hago un bucle for del filtro para totalizar
+    Pedido FINALIZADO, entre fechas y ordenado por vendedor
     """
-    filtro = None
     lista = []
     ventas = {}
     valores_ord = {}
@@ -912,23 +927,28 @@ def listVentGer(request):
         if form.is_valid():
             desde = request.POST.get("desde")
             hasta = request.POST.get("hasta")
+            # Chequeo que desde no sea mayor a hasta
+            if desde > hasta:
+                messages.error(request, 'desde debe ser menor a hasta', extra_tags='desde')
+                print(form.errors)
+            else:
+                lista = Pedido.objects.order_by('vendedor').filter(fecha__range=(desde, hasta), estado=('FINALIZADO'))
+                suma_totales = lista.aggregate(supertotal=Sum('total'))
+                if lista:       # si lista no esta vacia
+                    tmp = lista[0].vendedor
+                    subt = 0
+                    for x in range(len(lista)): 
+                        if tmp == lista[x].vendedor:
+                            subt = subt + lista[x].total
+                            ventas[tmp] = subt
+                        else:   
+                            subt = lista[x].total
+                            tmp = lista[x].vendedor
+                            ventas[tmp] = subt
 
-            lista = Pedido.objects.order_by('vendedor').filter(fecha__range=(desde, hasta), estado=('FINALIZADO'))
-            
-            tmp = lista[0].vendedor
-            subt = 0
-            for x in range(len(lista)): 
-                ventas[lista[x].vendedor] = lista[x].total
-                if tmp == lista[x].vendedor:
-                    subt = subt + lista[x].total
-                else:
-                    ventas[tmp] = subt
-                    #ttotal += subt
-                    subt = lista[x].total
-                    tmp = lista[x].vendedor
-            
-            valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))
-      
+                    # ordeno el diccionario
+                    valores_ord = dict(sorted(ventas.items(), reverse=True, key=operator.itemgetter(1)))
+                    ttotal = suma_totales['supertotal']
     else:
         form = FiltroFechas()
-    return render(request, 'appweb/listVentas.html', {'form': form,'pedido_list': filtro,'ventas': valores_ord, 'ttotal': ttotal})
+    return render(request, 'appweb/listVentas.html', {'form': form, 'ventas': valores_ord, 'ttotal': ttotal})
