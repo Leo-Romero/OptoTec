@@ -191,17 +191,14 @@ class PedidoTForm(forms.ModelForm):
         model = Pedido
         fields = (
             'fecha',
-       #     'cantidad',
             'nota',
         )
         widgets = {
             'fecha': forms.TextInput(attrs={'readonly': True}),
-      #      'cantidad': forms.TextInput(attrs={'readonly': True}),
             'nota': forms.Textarea(attrs={'readonly': True}),
         }
         help_texts = {
             'fecha': ('SOLO LECTURA'),
-       #     'cantidad': ('SOLO LECTURA'),
             'nota': ('SOLO LECTURA'),
         }
 

@@ -24,14 +24,10 @@ urlpatterns = [
     path('listPed/', listPedido, name='listPed'),
     path('editPed/<int:pk>/', editPedido, name='editPed'),
     path('delPed/<int:pk>/', delPedido, name='delPed'),
-
     path('addRenPed/', addRenPedido, name='addRenPed'),
     path('listRenPed/', listRenPedido, name='listRenPed'),
     path('verPed/<int:pk>/', vistalistRenPedido, name='verPed'),
-     path('verPedT/<int:pk>/', vistalistRenPedidoT, name='verPedT'),
-    #path('listRenPedEd/<int:pk>/', listRenPedidoEd, name='listRenPedEd'),
-    #path('editRenPed/<int:pk>/', editRenPedido, name='editRenPed'),
-
+    path('verPedT/<int:pk>/', vistalistRenPedidoT, name='verPedT'),
     path('listPedT/', listPedidoT, name='listPedT'),
     path('editPedT/<int:pk>/', editPedidoT, name='editPedT'),
     path('addProd/', addProducto, name='addProd'),

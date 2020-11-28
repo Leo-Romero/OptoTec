@@ -1,5 +1,4 @@
-#import datetime     # se usa?
-from django.db.models import Avg, Sum, Count    # sacar
+from django.db.models import Sum
 import operator # para el orden del diccionario
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -661,16 +660,6 @@ def listPedido(request):
     Todos los pedidos menos los FINALIZADO
     """
     pedidos = Pedido.objects.exclude(estado='FINALIZADO')
-    """
-    tmp = pedidos[0].paciente
-    for x in range(len(pedidos)):
-        b = RenglonPedido.objects.get(pk=pedidos[x].id)
-        renglones[pedidos[x].paciente] = b
-        print('-->', renglones)
-    
-    #renglones = RenglonPedido.objects.filter(pedido=pedidos)
-    #return render(request, 'appweb/pedido_list.html', {'pedido_list': pedidos, 'renglon': renglones})
-    """
     return render(request, 'appweb/pedido_list.html', {'pedido_list': pedidos})
 
 
@@ -680,7 +669,6 @@ def listRenPedido(request):
     """
     Todos los renglones
     """
-    #renglones = RenglonPedido.objects.all()
     renglones = {}
     return render(request, 'appweb/pedido_listR.html', {'renglon_list': renglones})
 
@@ -692,17 +680,8 @@ def vistalistRenPedido(request, pk):
     Vista de renlones por pedido
     """
     renglones = RenglonPedido.objects.filter(pedido=pk)
-
     return render(request, 'appweb/vistaPedRen.html', {'renglon_list': renglones})
 
-"""
-@login_required
-@permission_required('appweb.ventas')
-def listRenPedidoEd(request, pk):
-   
-    renglones = RenglonPedido.objects.filter(pedido_id=pk)
-    return render(request, 'appweb/pedido_listREd.html', {'renglon_list': renglones})
-"""
 
 @login_required
 @permission_required('appweb.ventas')
@@ -720,21 +699,6 @@ def editPedido(request, pk):
         redirect('/')
     return render(request, 'appweb/editPed.html', {'form': form, 'pk': pk})
 
-"""
-@login_required
-@permission_required('appweb.ventas')
-def editRenPedido(request, pk):
-
-    data = Pedido.objects.get(id = pk)
-    if request.method == 'GET':
-        form = PedidoForm(instance=data)
-    else:
-        form = PedidoForm(request.POST, instance=data)
-        if form.is_valid():
-            form.save()
-        redirect('/')
-    return render(request, 'appweb/editPed.html', {'form': form})
-"""
 
 @login_required
 @permission_required('appweb.ventas')
