@@ -761,8 +761,19 @@ def listPedidoT(request):
     """
     Lista solo los pedidos con estado = TALLER
     """
-    pedidos = Pedido.objects.filter(estado__exact='TALLER')
+    pedidos = Pedido.objects.filter(estado='TALLER')
     return render(request, 'appweb/pedido_listT.html', {'pedido_list': pedidos})
+
+
+@login_required
+@permission_required('appweb.tecnico')
+def vistalistRenPedidoT(request, pk):
+    """
+    Vista de renlones por pedido para taller
+    """
+    renglones = RenglonPedido.objects.filter(pedido=pk)
+
+    return render(request, 'appweb/vistaPedRenT.html', {'renglon_list': renglones})
 
 
 @login_required
@@ -778,6 +789,7 @@ def editPedidoT(request, pk):
     else:
         form = PedidoTForm(request.POST, instance=data)
         if form.is_valid():
+            data = form.save(commit=False)
             data.estado = 'FINALIZADO'
             form.save()
             return redirect('appweb:listPedT')

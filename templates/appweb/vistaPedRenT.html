@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+{% block title %}<title>Detalles</title>{% endblock %}
+
+{% block content %}
+{% load static %}
+    <h2>Detalles:</h2>
+    {% if renglon_list %}
+    <ul class="list-group">
+        {% for renglon in renglon_list %}
+        <li class="list-group-item">
+            <b>Producto: </b>{{renglon.producto}} <b>Cantidad: </b>{{renglon.cantidad}}<br>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>No hay datos para listar</p>
+    {% endif %}
+{% endblock %}
